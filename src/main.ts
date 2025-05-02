@@ -1,16 +1,13 @@
 import "./style.css";
-import { render } from "./renderer";
+import { createElement, render } from "./renderer";
 
 const root = document.getElementById("app")!;
 
-render(
-  {
-    type: "div",
-    props: {
-      id: "test",
-      style: { color: "red" },
-      children: [{ type: "p", props: { children: ["test"] } }],
-    },
-  },
-  root
+const element = createElement(
+  "div",
+  { id: "foo" },
+  createElement("a", null, "bar"),
+  createElement("b", null, "baz")
 );
+
+render(element, root);
