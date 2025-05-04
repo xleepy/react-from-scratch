@@ -10,7 +10,7 @@ export type Element = {
 
 export function createTextElement(text: string): Element {
   return {
-    type: "TEXT ELEMENT",
+    type: "TEXT_ELEMENT",
     props: {
       nodeValue: text,
       children: [],
@@ -147,9 +147,9 @@ function workLoop(deadline: IdleDeadline) {
 
 requestIdleCallback(workLoop);
 
-function reconcileChildren(element: any, elements: any[]) {
+function reconcileChildren(currentElement: any, elements: any[]) {
   let index = 0;
-  let oldFiber = element.alternate && element.alternate.child;
+  let oldFiber = currentElement.alternate && currentElement.alternate.child;
   let prevSibling: any = null;
 
   while (index < elements.length || oldFiber != null) {
@@ -163,7 +163,7 @@ function reconcileChildren(element: any, elements: any[]) {
         type: oldFiber.type,
         props: element.props,
         dom: oldFiber.dom,
-        parent: element,
+        parent: currentElement,
         alternate: oldFiber,
         effectTag: "UPDATE",
       };
@@ -173,7 +173,7 @@ function reconcileChildren(element: any, elements: any[]) {
         type: element.type,
         props: element.props,
         dom: null,
-        parent: element,
+        parent: currentElement,
         alternate: null,
         effectTag: "PLACEMENT",
       };
@@ -188,7 +188,7 @@ function reconcileChildren(element: any, elements: any[]) {
     }
 
     if (index === 0) {
-      element.child = newFiber;
+      currentElement.child = newFiber;
     } else if (element) {
       prevSibling.sibling = newFiber;
     }
@@ -197,6 +197,7 @@ function reconcileChildren(element: any, elements: any[]) {
     index++;
   }
 }
+
 function performUnitOfWork(element: any) {
   if (!element.dom) {
     element.dom = createDom(element);
