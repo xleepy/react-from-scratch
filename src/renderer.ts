@@ -21,7 +21,7 @@ export function createTextElement(text: string): Element {
 function updateDom(dom: any, prevProps: any, nextProps: any) {
   const isEvent = (key: string) => key.startsWith("on");
   const isProperty = (key: string) => key !== "children" && !isEvent(key);
-  const isGone = (prev: any, next: any) => (key: string) => !(key in next);
+  const isGone = (_prev: any, next: any) => (key: string) => !(key in next);
   const isNew = (prev: any, next: any) => (key: string) =>
     prev[key] !== next[key];
 
