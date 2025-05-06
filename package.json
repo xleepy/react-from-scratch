@@ -6,9 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "deploy": "cross-env BASE_PATH=/react-from-scratch npm run build",
     "preview": "vite preview"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "typescript": "~5.7.2",
     "vite": "^6.2.0"
   }
