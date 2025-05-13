@@ -10,7 +10,8 @@ const element = createElement(
     "a",
     {
       href: "https://example.com",
-      style: { marginRight: "1rem" },
+      className: "logo",
+      style: { marginRight: "1rem", color: "red" },
       "data-testid": "1",
     },
     "bar"

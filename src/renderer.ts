@@ -52,6 +52,10 @@ function updateDom(dom: any, prevProps: any, nextProps: any) {
         dom.setAttribute("style", stringifiedStyle);
         return;
       }
+      if (name === "className") {
+        dom.setAttribute("class", nexProp);
+        return;
+      }
       dom.setAttribute(name, nexProp);
     });
 
