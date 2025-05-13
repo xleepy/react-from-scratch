@@ -10,6 +10,10 @@ export function createTextElement(text: string): RenderElement {
   };
 }
 
+const camelCaseToKebabCase = (str: string) => {
+  return str.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+};
+
 function updateDom(dom: any, prevProps: any, nextProps: any) {
   const isEvent = (key: string) => key.startsWith("on");
   const isProperty = (key: string) => key !== "children" && !isEvent(key);
@@ -17,12 +21,18 @@ function updateDom(dom: any, prevProps: any, nextProps: any) {
   const isNew = (prev: any, next: any) => (key: string) =>
     prev[key] !== next[key];
 
+  const isHTMLElement = (dom: any) => dom instanceof HTMLElement;
+
   // Remove old properties
   Object.keys(prevProps)
     .filter(isProperty)
     .filter(isGone(prevProps, nextProps))
     .forEach((name) => {
-      dom[name] = "";
+      if (isHTMLElement(dom)) {
+        dom.removeAttribute(name);
+      } else {
+        dom[name] = "";
+      }
     });
 
   // Set new properties
@@ -30,7 +40,19 @@ function updateDom(dom: any, prevProps: any, nextProps: any) {
     .filter(isProperty)
     .filter(isNew(prevProps, nextProps))
     .forEach((name) => {
-      dom[name] = nextProps[name];
+      const nexProp = nextProps[name];
+      if (!isHTMLElement(dom)) {
+        dom[name] = nexProp;
+        return;
+      }
+      if (name === "style" && typeof nexProp === "object") {
+        const stringifiedStyle = Object.entries(nexProp)
+          .map(([key, value]) => `${camelCaseToKebabCase(key)}: ${value}`)
+          .join("; ");
+        dom[name] = stringifiedStyle;
+        return;
+      }
+      dom.setAttribute(name, nexProp);
     });
 
   // Remove old event listeners
