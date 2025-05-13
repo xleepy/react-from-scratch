@@ -49,7 +49,7 @@ function updateDom(dom: any, prevProps: any, nextProps: any) {
         const stringifiedStyle = Object.entries(nexProp)
           .map(([key, value]) => `${camelCaseToKebabCase(key)}: ${value}`)
           .join("; ");
-        dom[name] = stringifiedStyle;
+        dom.setAttribute("style", stringifiedStyle);
         return;
       }
       dom.setAttribute(name, nexProp);
