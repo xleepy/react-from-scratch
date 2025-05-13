@@ -1,4 +1,4 @@
-import { RenderElement, RenderNode } from "./types";
+import { PropsWithChildren, RenderElement, RenderNode } from "./types";
 
 export function createTextElement(text: string): RenderElement {
   return {
@@ -14,7 +14,11 @@ const camelCaseToKebabCase = (str: string) => {
   return str.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
 };
 
-function updateDom(dom: any, prevProps: any, nextProps: any) {
+function updateDom(
+  dom: any,
+  prevProps: PropsWithChildren,
+  nextProps: PropsWithChildren
+) {
   const isEvent = (key: string) => key.startsWith("on");
   const isProperty = (key: string) => key !== "children" && !isEvent(key);
   const isGone = (_prev: any, next: any) => (key: string) => !(key in next);

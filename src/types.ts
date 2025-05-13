@@ -1,5 +1,7 @@
 export type PropsWithChildren = {
   [key: string]: any;
+  className?: string;
+  style?: { [key: string]: string | number };
   children?: (RenderElement | string)[];
 };
 
