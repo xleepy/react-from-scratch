@@ -84,7 +84,7 @@ let wipRoot: any | null = null;
 let currentRoot: any | null = null;
 let deletions: any[] = [];
 
-export function render(element: Element, container: HTMLElement | Text) {
+export function render(element: RenderElement, container: HTMLElement | Text) {
   wipRoot = {
     dom: container,
     props: {
