@@ -1,14 +1,6 @@
-export type PropsWithChildren = {
-  [key: string]: any;
-  children?: (Element | string)[];
-};
+import { RenderElement, RenderNode } from "./types";
 
-export type Element = {
-  type?: string;
-  props?: PropsWithChildren;
-};
-
-export function createTextElement(text: string): Element {
+export function createTextElement(text: string): RenderElement {
   return {
     type: "TEXT_ELEMENT",
     props: {
@@ -63,8 +55,8 @@ function updateDom(dom: any, prevProps: any, nextProps: any) {
 export function createElement<Props = []>(
   type: string,
   props?: Props,
-  ...children: (Element | string)[]
-): Element {
+  ...children: (RenderElement | string)[]
+): RenderElement {
   return {
     type,
     props: {
@@ -147,32 +139,36 @@ function workLoop(deadline: IdleDeadline) {
 
 requestIdleCallback(workLoop);
 
-function reconcileChildren(currentElement: any, elements: any[]) {
+function reconcileChildren(currentElement: RenderNode, elements: RenderNode[]) {
   let index = 0;
   let oldFiber = currentElement.alternate && currentElement.alternate.child;
   let prevSibling: any = null;
 
   while (index < elements.length || oldFiber != null) {
     const element = elements[index];
-    let newFiber = null;
+    let newFiber: RenderNode | null = null;
 
     const sameType = oldFiber && element && element.type == oldFiber.type;
 
     if (sameType) {
       newFiber = {
-        type: oldFiber.type,
+        alternate: oldFiber?.alternate ?? null,
+        sibling: oldFiber?.sibling ?? null,
+        child: oldFiber?.child ?? null,
+        dom: oldFiber?.dom ?? null,
+        type: element.type,
         props: element.props,
-        dom: oldFiber.dom,
         parent: currentElement,
-        alternate: oldFiber,
         effectTag: "UPDATE",
       };
     }
     if (element && !sameType) {
       newFiber = {
+        dom: null,
+        child: null,
+        sibling: null,
         type: element.type,
         props: element.props,
-        dom: null,
         parent: currentElement,
         alternate: null,
         effectTag: "PLACEMENT",
@@ -183,7 +179,7 @@ function reconcileChildren(currentElement: any, elements: any[]) {
       deletions.push(oldFiber);
     }
 
-    if (oldFiber) {
+    if (oldFiber?.sibling) {
       oldFiber = oldFiber.sibling;
     }
 
