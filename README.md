@@ -9,4 +9,3 @@ link: <https://hackernoon.com/learn-you-some-custom-react-renderers-aed7164a4199
 Build: <https://xleepy.github.io/react-from-scratch/>
 
 
-https://pomb.us/build-your-own-react/
