@@ -17,7 +17,7 @@ const camelCaseToKebabCase = (str: string) => {
 function updateDom(
   dom: any,
   prevProps: PropsWithChildren,
-  nextProps: PropsWithChildren
+  nextProps: PropsWithChildren,
 ) {
   const isEvent = (key: string) => key.startsWith("on");
   const isProperty = (key: string) => key !== "children" && !isEvent(key);
@@ -92,7 +92,7 @@ export function createElement<Props = []>(
     props: {
       ...props,
       children: children.map((child) =>
-        typeof child === "object" ? child : createTextElement(child)
+        typeof child === "object" ? child : createTextElement(child),
       ),
     },
   };
