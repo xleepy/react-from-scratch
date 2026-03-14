@@ -1,6 +1,7 @@
 ## React from scratch for learning purposes
 
 References:
+
 - <https://pomb.us/build-your-own-react/>
 - <https://hackernoon.com/learn-you-some-custom-react-renderers-aed7164a4199>
 - <https://github.com/codecrafters-io/build-your-own-x?tab=readme-ov-file#build-your-own-front-end-framework--library>
@@ -35,16 +36,16 @@ Split `performUnitOfWork` into two branches:
 ```ts
 function performUnitOfWork(fiber) {
   if (fiber.type instanceof Function) {
-    updateFunctionComponent(fiber)
+    updateFunctionComponent(fiber);
   } else {
-    updateHostComponent(fiber)
+    updateHostComponent(fiber);
   }
 
-  if (fiber.child) return fiber.child
-  let next = fiber
+  if (fiber.child) return fiber.child;
+  let next = fiber;
   while (next) {
-    if (next.sibling) return next.sibling
-    next = next.parent
+    if (next.sibling) return next.sibling;
+    next = next.parent;
   }
 }
 ```
@@ -54,9 +55,9 @@ function performUnitOfWork(fiber) {
 ```ts
 function updateHostComponent(fiber) {
   if (!fiber.dom) {
-    fiber.dom = createDom(fiber)
+    fiber.dom = createDom(fiber);
   }
-  reconcileChildren(fiber, fiber.props.children)
+  reconcileChildren(fiber, fiber.props.children);
 }
 ```
 
@@ -64,8 +65,8 @@ function updateHostComponent(fiber) {
 
 ```ts
 function updateFunctionComponent(fiber) {
-  const children = [fiber.type(fiber.props)]
-  reconcileChildren(fiber, children)
+  const children = [fiber.type(fiber.props)];
+  reconcileChildren(fiber, children);
 }
 ```
 
@@ -83,24 +84,24 @@ Walk up the parent chain until a fiber with a real DOM node is found:
 
 ```ts
 function commitWork(fiber) {
-  if (!fiber) return
+  if (!fiber) return;
 
-  let domParentFiber = fiber.parent
+  let domParentFiber = fiber.parent;
   while (!domParentFiber.dom) {
-    domParentFiber = domParentFiber.parent
+    domParentFiber = domParentFiber.parent;
   }
-  const domParent = domParentFiber.dom
+  const domParent = domParentFiber.dom;
 
   if (fiber.effectTag === "PLACEMENT" && fiber.dom) {
-    domParent.appendChild(fiber.dom)
+    domParent.appendChild(fiber.dom);
   } else if (fiber.effectTag === "UPDATE" && fiber.dom) {
-    updateDom(fiber.dom, fiber.alternate.props, fiber.props)
+    updateDom(fiber.dom, fiber.alternate.props, fiber.props);
   } else if (fiber.effectTag === "DELETION") {
-    commitDeletion(fiber, domParent)
+    commitDeletion(fiber, domParent);
   }
 
-  commitWork(fiber.child)
-  commitWork(fiber.sibling)
+  commitWork(fiber.child);
+  commitWork(fiber.sibling);
 }
 ```
 
@@ -109,9 +110,9 @@ Deletion also needs to handle function fibers — walk down until a real DOM nod
 ```ts
 function commitDeletion(fiber, domParent) {
   if (fiber.dom) {
-    domParent.removeChild(fiber.dom)
+    domParent.removeChild(fiber.dom);
   } else {
-    commitDeletion(fiber.child, domParent)
+    commitDeletion(fiber.child, domParent);
   }
 }
 ```
@@ -131,8 +132,8 @@ Hooks look like magic but the mechanism is simple:
 Two module-level variables are needed:
 
 ```ts
-let wipFiber = null   // the function component fiber currently being processed
-let hookIndex = 0     // which hook slot we are on
+let wipFiber = null; // the function component fiber currently being processed
+let hookIndex = 0; // which hook slot we are on
 ```
 
 ---
@@ -143,12 +144,12 @@ Update `updateFunctionComponent` to set these before calling the function:
 
 ```ts
 function updateFunctionComponent(fiber) {
-  wipFiber = fiber
-  hookIndex = 0
-  wipFiber.hooks = []
+  wipFiber = fiber;
+  hookIndex = 0;
+  wipFiber.hooks = [];
 
-  const children = [fiber.type(fiber.props)]
-  reconcileChildren(fiber, children)
+  const children = [fiber.type(fiber.props)];
+  reconcileChildren(fiber, children);
 }
 ```
 
@@ -157,40 +158,41 @@ Implement `useState`:
 ```ts
 export function useState(initial) {
   // Read the old hook for this slot from the previous render
-  const oldHook = wipFiber?.alternate?.hooks?.[hookIndex]
+  const oldHook = wipFiber?.alternate?.hooks?.[hookIndex];
 
   const hook = {
     state: oldHook ? oldHook.state : initial,
     queue: [],
-  }
+  };
 
   // Apply any setState calls that were queued during the previous render cycle
-  oldHook?.queue.forEach(action => {
-    hook.state = action(hook.state)
-  })
+  oldHook?.queue.forEach((action) => {
+    hook.state = action(hook.state);
+  });
 
   const setState = (action) => {
-    const fn = typeof action === "function" ? action : () => action
-    hook.queue.push(fn)
+    const fn = typeof action === "function" ? action : () => action;
+    hook.queue.push(fn);
 
     // Trigger a re-render
     wipRoot = {
       dom: currentRoot.dom,
       props: currentRoot.props,
       alternate: currentRoot,
-    }
-    nextUnitOfWork = wipRoot
-    deletions = []
-  }
+    };
+    nextUnitOfWork = wipRoot;
+    deletions = [];
+  };
 
-  wipFiber.hooks.push(hook)
-  hookIndex++
+  wipFiber.hooks.push(hook);
+  hookIndex++;
 
-  return [hook.state, setState]
+  return [hook.state, setState];
 }
 ```
 
 **What happens when `setState` is called:**
+
 1. The updater function is pushed to the hook's queue.
 2. A new `wipRoot` is created pointing at the current tree as its `alternate`.
 3. Setting `nextUnitOfWork` wakes up the work loop and starts a re-render.
@@ -203,7 +205,7 @@ export function useState(initial) {
 `RenderNode.type` must accept a function:
 
 ```ts
-type: string | ((props: any) => RenderElement)
+type: string | ((props: any) => RenderElement);
 ```
 
 Add a `hooks` field to `RenderNode`:
@@ -215,7 +217,7 @@ hooks?: Array<{ state: any; queue: Array<(s: any) => any> }>
 Update `createElement` to accept a function as `type`:
 
 ```ts
-export function createElement(type: string | Function, props?, ...children)
+export function createElement(type: string | Function, props?, ...children);
 ```
 
 ---
@@ -224,15 +226,16 @@ export function createElement(type: string | Function, props?, ...children)
 
 ```ts
 function Counter() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
   return createElement(
-    "div", {},
+    "div",
+    {},
     createElement("p", {}, String(count)),
-    createElement("button", { onClick: () => setCount(c => c + 1) }, "+1")
-  )
+    createElement("button", { onClick: () => setCount((c) => c + 1) }, "+1"),
+  );
 }
 
-render(createElement(Counter, {}), document.getElementById("root"))
+render(createElement(Counter, {}), document.getElementById("root"));
 ```
 
 ---
@@ -268,6 +271,10 @@ render(element, container)
 ```
 
 **Key concepts:**
+
+
+**Key concepts:**
+
 - **Fiber** — a unit of work. One per element. Holds DOM reference, props, effect tag, hooks, and tree pointers.
 - **alternate** — each fiber points to its previous version. This is how old and new state are compared.
 - **Two-phase rendering** — the render phase can be interrupted (time-sliced). The commit phase runs all at once so the DOM is never left in a partial state.
